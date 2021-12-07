@@ -1,1 +1,1 @@
-# RPA
+# This project used TagUI for Python.
