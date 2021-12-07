@@ -55,7 +55,7 @@ print(a)
 print(b)
 # a = r.read('//*[@class="basic_datagrid report_table"]/tbody/tr[1]').replace('\n', '')
 # print(a)
-# r.telegram('5084632752', a)
+# r.telegram('os.getenv('TELEGRAM'), a)
 
 # r.click('bt_s_typeC w150')
 # r.keyboard('[enter]')
