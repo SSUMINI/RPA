@@ -32,12 +32,16 @@ def send_mail(title):
     r.type('addr_name', os.getenv('TEST_NAME'))
     r.type('addr_email', os.getenv('TEST_EMAIL'))
     r.click('bt_s_typeB w66 mg_r4')
-    #프리뷰 내용
+    # 프리뷰 내용
     r.type('prevMessege','프리뷰')
     r.wait(2)
     # 이메일 내용
     r.click('contents')
     r.type('contents', '테스트페이지 하나 둘')
+    r.snap('page', 'content2.png')
+    # 첨부파일 추가
+    r.upload('input.ipt_fileA','content2.png')
+    r.dom('window.confirm = function alert(message) {return true;}')
     # 수신동의 문구
     r.type('mailConfirm','동의하니?')
     r.click('mailConfirmChk_Label')
