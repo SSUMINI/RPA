@@ -2,6 +2,6 @@ import bizmailer as b
 
 b.start()
 b.login()
-b.send_mail('우리집')
-b.mail_result()
+b.send_mail('메일 발송테스트')
 b.notify()
+# b.close()
