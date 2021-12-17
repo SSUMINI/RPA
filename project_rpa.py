@@ -7,13 +7,16 @@ import rpa as r
 load_dotenv()
 biz_url = os.getenv('BIZ_URL')
 asp_url = os.getenv('ASP_URL')
+notify_msg = []
 
 # ******시작******
 def init():
     # visual_automation = False, chrome_browser = True, headless_mode = False, turbo_mode = False
     # visual_automation : use keyboard automation 
     r.init(visual_automation= True,turbo_mode = True)
-
+def wait():
+    r.wait(30)
+    return True
 def close():
     r.close()
 
@@ -50,12 +53,6 @@ class Bizmailer:
         r.upload('input.ipt_fileA','content.png')
         r.dom('window.confirm = function alert(message) {return true;}')
         r.wait(2)
-        # # 수신동의 문구
-        # r.type('mailConfirm','수신동의?')
-        # r.click('mailConfirmChk_Label')
-        # # 수신 미동의 문구
-        # r.type('mailDeny','수신미동의')
-        # r.click('mailDenyChk_Label')
         #발송하기
         r.click('next')
         r.wait(2)
@@ -70,7 +67,7 @@ class Bizmailer:
 
     # ******메일 발송결과******
     def notify_mail():
-        r.wait(60)
+        global notify_mail
         r.hover('txt_purp first')
         r.click('//*[@id="table_bi"]/div/div[2]/ul/li[1]/ul/li[1]/a')
         r.click('//*[@id="aqBlue"]/tbody/tr[2]/td[2]/a')
@@ -80,29 +77,47 @@ class Bizmailer:
         if send_good[1] != '(100.0%)':
             r.click('TABClass4')
             fail_text = r.read('/html/body/div[5]/div/table[9]/tbody/tr[2]/td/table/tbody').replace('\n', '')
-            print(fail_text)
-            r.telegram(os.getenv('TELEGRAM'), '메일발송테스트결과 \n'+'***** \"'+send_fail[0]+'\"건발송 오류***** \n' + fail_text)
-        else: r.telegram(os.getenv('TELEGRAM'), '메일발송테스트결과 \n'+'\"'+send_sub+'\"' + send_good[0]+' 건 테스트 성공')
+
+            notify_mail = '***** \"'+send_fail[0]+'\"건발송 오류***** \n' + fail_text
+
+        else: 
+            notify_mail = '\"'+send_sub+'\"' + send_good[0]+' 건 테스트 성공'
+
         return True
 
-    def send_message():
+    def send_message(title, content):
         r.hover('txt_purp first')
         r.click('//*[@id="table_bi"]/div/div[2]/ul/li[3]/ul/li[1]/a')
         r.click('sendTitle')
-        r.type('sendTitle', '문자제목입니다.')
-        r.type('sendContents', 'testmessage')
+        r.type('sendTitle', title)
+        r.type('sendContents', content)
+        # 첨부파일 등록
         r.dom('fileAttach(this, true);')
-        r.upload('input.intext','캡처.jpg')
+        r.upload('input.intext','content2.jpg')
         r.click('btnBlueSmall')
+        r.wait()
+        # 첨부파일 삭제
         r.dom('window.confirm = function alert(message) {return true;}')
         r.dom('fileAttach(this, false);')
-        r.type('rcvPerson1', '123')
+
+        # 보낼 연락처
+        r.wait(2)
+        r.type('rcvPerson1', os.getenv('FAIL_PHONE_1'))
+        r.type('rcvPerson2', os.getenv('TEST_PHONE_1'))
+        r.type('rcvPerson3', os.getenv('TEST_PHONE_2'))
+        r.type('rcvPerson4', os.getenv('FAIL_PHONE_2'))
 
         r.click('btnSend')
-        r.keyboard('[enter]')
         r.wait(2)
+        r.keyboard('[enter]')
+        r.keyboard('[enter]')
+        r.keyboard('[enter]')
+        r.wait()
+        return True
 
     def notify_message():
+        global notify_msg
+        list = []
 
         r.hover('txt_purp first')
         r.click('//*[@id="table_bi"]/div/div[2]/ul/li[1]/ul/li[3]/a')
@@ -112,18 +127,22 @@ class Bizmailer:
         table = '/html/body/div[5]/div/table[3]/tbody/tr[6]/td/table/tbody/'
         success = r.read('blueBL').split(' ')
         fail= r.read('redBL').split(' ')
+
+        list.append('총 발신 통수 = '+ total + '건, 성공 = ' + success[0] + '건, 실패 = '+ fail[0] +'입니다.')
+
         if success[1] != '(100%)':
+            list.append('문자발송 상세분석 결과')
             for i in range(1,6):
                 for j in range(1,6):
                     result = r.read(table+'tr['+str(i)+']/th['+str(j)+']')
                     count = r.read(table+'tr['+str(i)+']/td['+str(j)+']')
                     if count != '-':
-                        r.telegram(os.getenv('TELEGRAM'), '문자발송테스트결과\n'+'총 발신 통수 = '+ total + '건, 성공 = ' + success[0] + '건, 실패 = '+ fail[0] +'입니다. \n'+'문자발송 상세분석 결과 "'+ result + ' ' + count + '건" ')                  
-        else: 
-            r.telegram(os.getenv('TELEGRAM'), '문자발송테스트결과\n'+ '총 발신 통수 = '+ total + '건, 성공 = ' + success[0] + '건, 실패 = '+ fail[0] +'입니다.' )
+                        list.append('- '+ result + '  "' + count + '" 건 ')
+
+        notify_msg = '\n'.join(list)
 
 
-    def add():
+    def address():
         r.hover('txt_purp first')
         r.click('//*[@id="table_bi"]/div/div[2]/ul/li[4]/ul/li[1]/a')
         r.click('btnGreen')
@@ -131,6 +150,7 @@ class Bizmailer:
         r.upload('input.intext','address.csv')
         r.click('btnBlueSmall')
         r.click('isHeader')
+        r.dom('window.confirm = function alert(message) {return true;}')
         r.frame('fileFrame')
         r.select('//*[@id="aqBlue"]/tbody/tr[1]/th[1]/select','customName')
         r.select('//*[@id="aqBlue"]/tbody/tr[1]/th[2]/select','customEmail')
@@ -139,8 +159,13 @@ class Bizmailer:
         r.dom('window.confirm = function alert(message) {return true;}')
         r.click('btnGreen')
         r.dom('window.confirm = function alert(message) {return true;}')
-        r.click('btnBlue')
+        # r.click('btnBlue')
         return True
+
+    def notify():
+        r.telegram(os.getenv('TELEGRAM'), '1.문자발송테스트결과 \n' +  notify_mail + '\n\n' + '2.메일발송테스트결과 \n'+ notify_msg )
+
+        # print('1.문자발송테스트결과 \n' +  notify_mail + '\n\n' + '2.메일발송테스트결과 \n'+ notify_msg)
 
 
     # # ******OCR로 메일전송결과 확인******
@@ -165,13 +190,11 @@ class Bizmailer:
 
 class javaASP:
     def start():
-        r.url('http://'+ asp_url + '/bizsmart/manager/main.do')
-        r.wait(3)
-
-    def login():
+        r.url('http://'+ asp_url)
+        r.wait()
+        # login
         r.type('userId', os.getenv('ASP_USER'))
-        r.type('userPwd',os.getenv('ASP_PASS'))
-        #login button
+        r.type('userPwd',os.getenv('ASP_PASS'))  
         r.click('funfunBtnLogin')
         return True
 
