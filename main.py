@@ -33,7 +33,7 @@ p.Bizmailer.notify_message()
 # p.javaASP.start()
 # print('***** javaASP 로그인 성공 *****')
 
-p.Bizmailer.notify()
+p.notify()
 
 # p.javaASP.sms()
 

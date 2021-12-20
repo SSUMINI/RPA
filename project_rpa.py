@@ -7,7 +7,7 @@ import rpa as r
 load_dotenv()
 biz_url = os.getenv('BIZ_URL')
 asp_url = os.getenv('ASP_URL')
-notify_msg = []
+
 
 # ******시작******
 def init():
@@ -78,10 +78,10 @@ class Bizmailer:
             r.click('TABClass4')
             fail_text = r.read('/html/body/div[5]/div/table[9]/tbody/tr[2]/td/table/tbody').replace('\n', '')
 
-            notify_mail = '***** \"'+send_fail[0]+'\"건발송 오류***** \n' + fail_text
+            notify_mail = '***** \"' + send_fail[0] + '\"건발송 오류***** \n'  + fail_text
 
         else: 
-            notify_mail = '\"'+send_sub+'\"' + send_good[0]+' 건 테스트 성공'
+            notify_mail = '\"'+send_sub+'\"' + send_good[0] + ' 건 테스트 성공'
 
         return True
 
@@ -162,31 +162,14 @@ class Bizmailer:
         # r.click('btnBlue')
         return True
 
-    def notify():
-        r.telegram(os.getenv('TELEGRAM'), '1.문자발송테스트결과 \n' +  notify_mail + '\n\n' + '2.메일발송테스트결과 \n'+ notify_msg )
-
-        # print('1.문자발송테스트결과 \n' +  notify_mail + '\n\n' + '2.메일발송테스트결과 \n'+ notify_msg)
-
-
-    # # ******OCR로 메일전송결과 확인******
+    # # ******메일전송결과 확인******
     # def send_result():
     #     raw1 = r.read('//*[@id="aqBlue"]/tbody/tr[1]').replace('\n', '\t')
     #     raw2 = r.read('//*[@id="aqBlue"]/tbody/tr[2]').replace('\n', '')
     #     raw = raw1 + '\n' + raw2
     #     return raw
 
-    # # func2.자동메일발송
-    # r.hover('txt_purp first')
-    # r.click('//*[@href="/bizsmart/manager/campaign/auto.do"]')
-    # # func3. A/B 메일 발송
-    # r.hover('txt_purp first')
-    # r.click('//*[@href="/bizsmart/manager/campaign/ab.do"]')
-    # # func4. 이메일 템플릿
-    # r.hover('txt_purp first')
-    # r.click('//*[@href="/bizsmart/manager/campaign/mailTemplate.do"]')
-    # # func5. 첨부파일관리 
-    # r.hover('txt_purp first')
-    # r.click('//*[@href="/bizsmart/manager/campaign/attach.do"]')
+
 
 class javaASP:
     def start():
@@ -196,11 +179,104 @@ class javaASP:
         r.type('userId', os.getenv('ASP_USER'))
         r.type('userPwd',os.getenv('ASP_PASS'))  
         r.click('funfunBtnLogin')
+        r.wait(2)
+        r.click('logo')
         return True
 
-    def sms():
-        r.hover('//*[@id="lnb"]/div/ul/li[1]')
-        r.click('ico_sms')
+    def sms(title):
+        global sms_result
+        r.click('//*[@id="lnb"]/div/ul/li[1]/a')
+        r.type('sendMainDtoSubject', title)
+        r.dom('window.confirm = function alert(message) {return true;}')
+        r.click('emoticon.message')
+
+        r.popup('http://' + asp_url + 'send/receiver/popup/address/groups')
+
+        if r.present(os.getenv('TEST_GROUP')) == True:
+
+            # 개별 체크할때
+            r.click(os.getenv('TEST_GROUP'))
+            r.click('sendReceiverAllSelect')
+            r.dom('window.confirm = function alert(message) {return true;}')
+            r.click('btnSendReceiverAddressSubmit')
+            r.click('btnSendReceiverClose')
+            
+            # 그룹으로 체크할때
+            # r.click('sendReceiverAllSelect')
+            r.popup()
+        else: 
+            print('주소록 호출이 안됩니다!.')
+            r.click('btnSendReceiverClose')
+            r.popup()
+
+        # 문자 보낸후 그대로일때.
+        r.click('btnSent')
+        r.keyboard('[enter]')
+
+        if r.read('//*[@id="cont"]/div[1]/h1') == '문자보내기':
+            sms_result = '**error** 문자 전송 불가'
+        else: sms_result = '**OK** 문자 전송 성공'
+
+    def add_sms(title):
+        r.click('//*[@id="lnb"]/div/ul/li[4]/a')
+        r.type('sendMainDtoSubject', title)
+        r.dom('window.confirm = function alert(message) {return true;}')
+        r.click('//*[@id="emoticon-list"]/dl[4]/dd[1]')
+        r.type('textReceiverInput', os.getenv('TEST_PHONE_1'))
+        r.click('btnReceiverAdd')
+        r.click('btnSend')
+
+    def election_sms(title, content):
+        r.click('//*[@id="lnb"]/div/ul/li[3]/a')
+        r.type('sendMainDtoSubject', title)
+        r.type('sendMessageDtoMessage', content)
+        r.dom('window.confirm = function alert(message) {return true;}')
+        r.click('//*[@id="emoticon-list"]/dl[4]/dd[1]')
+        r.type('textReceiverInput', os.getenv('TEST_PHONE_2'))
+        r.click('btnReceiverAdd')
+        r.click('btnSend')
+        r.keyboard('[enter]')
+
+
+
+
+    def address():
+        global j_addr_result
+        r.click('//*[@id="lnb"]/div/ul/li[6]/a')
+        r.type('addGroupName', os.getenv('TEST_GROUP'))
+        r.click('btn_small_wadd')
+        r.wait(2)
+        r.keyboard('[enter]')
+        r.wait(2)
+        r.click('//*[@id="funTable"]/tbody/tr[4]/td[2]/div/a[1]')
+        r.type('inp_name', os.getenv('TEST_NAME'))
+        r.type('inp_hp', os.getenv('TEST_PHONE_1'))
+        r.type('inp_fax', os.getenv('TEST_FAX'))
+        r.type('inp_email', os.getenv('TEST_EMAIL'))
+        r.click('saveMember')
+        r.keyboard('[enter]')
+        r.wait(2)
+        r.click('//*[@id="lnb"]/div/ul/li[6]/a')
+        r.hover('addGroupName')
+
+        if r.present('//*[@id="funTable"]/tbody/tr[4]') == True:
+            j_addr_result = '**OK** 주소록 저장이 완료되었습니다.'
+        else: j_addr_result = '**error** 주소록 저장 실패'
+
+
+class notify:
+
+    def biz():
+    
+        r.telegram(os.getenv('TELEGRAM'), '1.문자발송테스트결과 \n' +  notify_mail + '\n\n' + '2.메일발송테스트결과 \n'+ notify_msg )
+
+        # print('1.문자발송테스트결과 \n' +  notify_mail + '\n\n' + '2.메일발송테스트결과 \n'+ notify_msg)
+
+    def asp():
+        print('1. 주소록 저장 테스트 결과 \n' + j_addr_result + '\n\n' + '2. SMS 발송 테스트 결과 \n' + sms_result)
+            
+
+
 
 
     
