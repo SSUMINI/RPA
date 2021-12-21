@@ -29,6 +29,9 @@ class Bizmailer:
         r.type('userPw',os.getenv('BIZ_PASS'))
         r.click('bt_login mg_r6')
         return True
+        
+    def restart():
+        r.url('https://'+ biz_url + '/bizsmart/manager/main.do')
 
     # ******메일 발송******
     def send_mail(title):
@@ -160,6 +163,7 @@ class Bizmailer:
         r.dom('window.confirm = function alert(message) {return true;}')
         r.click('btnGreen')
         r.dom('window.confirm = function alert(message) {return true;}')
+        r.keyboard('[enter]')
         # r.click('btnBlue')
         return True
 
@@ -187,12 +191,21 @@ class javaASP:
 
     def sms(title):
         global sms_result
+        global add_take
+
         r.click('//*[@id="lnb"]/div/ul/li[1]/a')
         r.type('sendMainDtoSubject', title)
         r.dom('window.confirm = function alert(message) {return true;}')
         r.click('emoticon.message')
 
+        # 주소록 호출
+        r.click('btnSendReceiverAddress')
+        r.wait()
+
         r.popup('http://' + asp_url + 'send/receiver/popup/address/groups')
+
+        print('http://' + asp_url + 'send/receiver/popup/address/groups')
+        print('http://www-dev.adppurio.com:10051/send/receiver/popup/address/groups')
 
         if r.present(os.getenv('TEST_GROUP')) == True:
 
@@ -206,23 +219,29 @@ class javaASP:
             # 그룹으로 체크할때
             # r.click('sendReceiverAllSelect')
             r.popup()
-        else: 
-            print('주소록 호출이 안됩니다!.')
+
+            add_take = '주소록 호출 성공!' 
+        else:
+            add_take = '주소록 호출이 안됩니다!' 
+            print(add_take)
             r.click('btnSendReceiverClose')
             r.popup()
 
         # 문자 보낸후 그대로일때.
-        r.click('btnSent')
+        r.wait(2)
+        r.click('btn_send')
+        r.wait(2)
         r.keyboard('[enter]')
 
         if r.read('//*[@id="cont"]/div[1]/h1') == '문자보내기':
-            sms_result = '**error** 문자 전송 불가'
-        else: sms_result = '**OK** 문자 전송 성공'
+            sms_result = '**error** SMS 전송 불가'
+        else: sms_result = '**OK** SMS 전송 성공'
 
     def mms(title):
         r.click('//*[@id="lnb"]/div/ul/li[2]/a')
 
     def election_sms(title, content):
+        global election_result
         r.click('//*[@id="lnb"]/div/ul/li[3]/a')
         r.type('sendMainDtoSubject', title)
         r.type('sendMessageDtoMessage', content)
@@ -230,17 +249,29 @@ class javaASP:
         r.click('//*[@id="emoticon-list"]/dl[4]/dd[1]')
         r.type('textReceiverInput', os.getenv('TEST_PHONE_2'))
         r.click('btnReceiverAdd')
-        r.click('btnSend')
+        r.click('btn_send')
+        r.wait(2)
         r.keyboard('[enter]')
 
+        if r.read('//*[@id="cont"]/div[1]/h1') == '선거 문자보내기':
+            election_result = '**error** 선거 문자 전송 불가'
+        else: election_result = '**OK** 선거 문자 전송 성공'        
+
     def ad_sms(title):
+        global ad_result
         r.click('//*[@id="lnb"]/div/ul/li[4]/a')
         r.type('sendMainDtoSubject', title)
         r.dom('window.confirm = function alert(message) {return true;}')
         r.click('//*[@id="emoticon-list"]/dl[4]/dd[1]')
         r.type('textReceiverInput', os.getenv('TEST_PHONE_1'))
         r.click('btnReceiverAdd')
-        r.click('btnSend')
+        r.click('btn_send')
+        r.wait(2)
+        r.keyboard('[enter]')
+
+        if r.read('//*[@id="cont"]/div[1]/h1') == '광고 문자보내기':
+            ad_result = '**error** 광고 문자 전송 불가'
+        else: ad_result = '**OK** 광고 문자 전송 성공'        
     
     def fax(title):
         r.click('//*[@id="lnb"]/div/ul/li[5]/a')
@@ -278,7 +309,10 @@ class notify:
         # print('1.문자발송테스트결과 \n' +  notify_mail + '\n\n' + '2.메일발송테스트결과 \n'+ notify_msg)
 
     def asp():
-        print('1. 주소록 저장 테스트 결과 \n' + j_addr_result + '\n\n' + '2. SMS 발송 테스트 결과 \n' + sms_result)
+
+        r.telegram(os.getenv('TELEGRAM'), '1. 주소록 저장 테스트 결과 \n' + j_addr_result + '\n\n' + '2. SMS 발송 테스트 결과 \n' + '- '+ add_take + '\n - ' + sms_result + '\n\n' + '3. MMS 발송 테스트 결과\n' +'\n\n' + '4. 선거문자 발송 테스트 결과 \n' + election_result +'\n\n' + '5. 광고문자 발송 테스트 결과 \n' + ad_result + '\n\n' + '6. 팩스 발송 테스트 결과 \n')
+        
+        print('1. 주소록 저장 테스트 결과 \n' + j_addr_result + '\n\n' + '2. SMS 발송 테스트 결과 \n' + '- '+ add_take + '\n - ' + sms_result + '\n\n' + '3. MMS 발송 테스트 결과\n' +'\n\n' + '4. 선거문자 발송 테스트 결과 \n' + election_result +'\n\n' + '5. 광고문자 발송 테스트 결과 \n' + ad_result + '\n\n' + '6. 팩스 발송 테스트 결과 \n')
             
 
 
