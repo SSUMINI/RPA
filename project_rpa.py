@@ -61,6 +61,7 @@ class Bizmailer:
         r.wait(2)
         r.keyboard('[enter]')
         r.keyboard('[enter]')
+        r.keyboard('[enter]')
         r.popup()
         return True
 
@@ -172,6 +173,7 @@ class Bizmailer:
 
 
 class javaASP:
+
     def start():
         r.url('http://'+ asp_url)
         r.wait()
@@ -217,14 +219,8 @@ class javaASP:
             sms_result = '**error** 문자 전송 불가'
         else: sms_result = '**OK** 문자 전송 성공'
 
-    def add_sms(title):
-        r.click('//*[@id="lnb"]/div/ul/li[4]/a')
-        r.type('sendMainDtoSubject', title)
-        r.dom('window.confirm = function alert(message) {return true;}')
-        r.click('//*[@id="emoticon-list"]/dl[4]/dd[1]')
-        r.type('textReceiverInput', os.getenv('TEST_PHONE_1'))
-        r.click('btnReceiverAdd')
-        r.click('btnSend')
+    def mms(title):
+        r.click('//*[@id="lnb"]/div/ul/li[2]/a')
 
     def election_sms(title, content):
         r.click('//*[@id="lnb"]/div/ul/li[3]/a')
@@ -237,8 +233,17 @@ class javaASP:
         r.click('btnSend')
         r.keyboard('[enter]')
 
-
-
+    def ad_sms(title):
+        r.click('//*[@id="lnb"]/div/ul/li[4]/a')
+        r.type('sendMainDtoSubject', title)
+        r.dom('window.confirm = function alert(message) {return true;}')
+        r.click('//*[@id="emoticon-list"]/dl[4]/dd[1]')
+        r.type('textReceiverInput', os.getenv('TEST_PHONE_1'))
+        r.click('btnReceiverAdd')
+        r.click('btnSend')
+    
+    def fax(title):
+        r.click('//*[@id="lnb"]/div/ul/li[5]/a')
 
     def address():
         global j_addr_result
