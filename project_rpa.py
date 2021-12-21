@@ -29,7 +29,7 @@ class Bizmailer:
         r.type('userPw',os.getenv('BIZ_PASS'))
         r.click('bt_login mg_r6')
         return True
-        
+
     def restart():
         r.url('https://'+ biz_url + '/bizsmart/manager/main.do')
 
@@ -204,9 +204,6 @@ class javaASP:
 
         r.popup('http://' + asp_url + 'send/receiver/popup/address/groups')
 
-        print('http://' + asp_url + 'send/receiver/popup/address/groups')
-        print('http://www-dev.adppurio.com:10051/send/receiver/popup/address/groups')
-
         if r.present(os.getenv('TEST_GROUP')) == True:
 
             # 개별 체크할때
@@ -304,7 +301,7 @@ class notify:
 
     def biz():
     
-        r.telegram(os.getenv('TELEGRAM'), '1.문자발송테스트결과 \n' +  notify_mail + '\n\n' + '2.메일발송테스트결과 \n'+ notify_msg )
+        r.telegram(os.getenv('TELEGRAM'), '1.메일발송 테스트 결과 \n' +  notify_mail + '\n\n' + '2.문자발송 테스트 결과 \n'+ notify_msg )
 
         # print('1.문자발송테스트결과 \n' +  notify_mail + '\n\n' + '2.메일발송테스트결과 \n'+ notify_msg)
 
