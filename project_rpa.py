@@ -200,7 +200,7 @@ class javaASP:
 
         # 주소록 호출
         r.click('btnSendReceiverAddress')
-        r.wait()
+        r.wait(2)
 
         r.popup('http://' + asp_url + 'send/receiver/popup/address/groups')
 
@@ -217,9 +217,9 @@ class javaASP:
             # r.click('sendReceiverAllSelect')
             r.popup()
 
-            add_take = '주소록 호출 성공!' 
+            add_take = '**OK**\t 주소록 호출' 
         else:
-            add_take = '주소록 호출이 안됩니다!' 
+            add_take = '**error**\n 주소록 호출이 안됩니다!' 
             print(add_take)
             r.click('btnSendReceiverClose')
             r.popup()
@@ -231,8 +231,8 @@ class javaASP:
         r.keyboard('[enter]')
 
         if r.read('//*[@id="cont"]/div[1]/h1') == '문자보내기':
-            sms_result = '**error** SMS 전송 불가'
-        else: sms_result = '**OK** SMS 전송 성공'
+            sms_result = '**error**\n SMS 전송 불가'
+        else: sms_result = '**OK**\t SMS 전송 성공'
 
     def mms(title):
         r.click('//*[@id="lnb"]/div/ul/li[2]/a')
@@ -247,12 +247,12 @@ class javaASP:
         r.type('textReceiverInput', os.getenv('TEST_PHONE_2'))
         r.click('btnReceiverAdd')
         r.click('btn_send')
-        r.wait(2)
+        r.wait(1)
         r.keyboard('[enter]')
 
         if r.read('//*[@id="cont"]/div[1]/h1') == '선거 문자보내기':
-            election_result = '**error** 선거 문자 전송 불가'
-        else: election_result = '**OK** 선거 문자 전송 성공'        
+            election_result = '**error**\n 선거 문자 전송 불가'
+        else: election_result = '**OK**\t 선거 문자 전송 성공'        
 
     def ad_sms(title):
         global ad_result
@@ -263,24 +263,43 @@ class javaASP:
         r.type('textReceiverInput', os.getenv('TEST_PHONE_1'))
         r.click('btnReceiverAdd')
         r.click('btn_send')
-        r.wait(2)
+        r.wait(1)
         r.keyboard('[enter]')
 
         if r.read('//*[@id="cont"]/div[1]/h1') == '광고 문자보내기':
-            ad_result = '**error** 광고 문자 전송 불가'
-        else: ad_result = '**OK** 광고 문자 전송 성공'        
+            ad_result = '**error**\n 광고 문자 전송 불가'
+        else: ad_result = '**OK** \t 광고 문자 전송 성공'        
     
     def fax(title):
+        global fax_err
+        global fax_send
         r.click('//*[@id="lnb"]/div/ul/li[5]/a')
+        r.type('sendMainDtoSubject', title)
+        r.type('textReceiverInput', os.getenv('TEST_FAX'))
+        r.type('textReceiverName', '한팩스')
+        r.click('btnReceiverAdd')
+        r.upload('input.fileupload', 'content2.jpg' )
+        r.wait(3)
+        if r.present('lypopupWrap fileConv') == True:
+            fax_err = '**error** \n 파일 변환 불가'
+            fax_send = '**error** \n FAX 전송 불가'
+            r.wait(2)
+            r.dom('window.location.reload()')
+
+        else:
+            r.click('funFaxSend')
+            fax_err = ''
+            fax_send = '**OK** \t FAX 전송 성공'
+            print('성공이네요?')
 
     def address():
         global j_addr_result
         r.click('//*[@id="lnb"]/div/ul/li[6]/a')
         r.type('addGroupName', os.getenv('TEST_GROUP'))
         r.click('btn_small_wadd')
-        r.wait(2)
+        r.wait(1)
         r.keyboard('[enter]')
-        r.wait(2)
+        r.wait(1)
         r.click('//*[@id="funTable"]/tbody/tr[4]/td[2]/div/a[1]')
         r.type('inp_name', os.getenv('TEST_NAME'))
         r.type('inp_hp', os.getenv('TEST_PHONE_1'))
@@ -288,13 +307,13 @@ class javaASP:
         r.type('inp_email', os.getenv('TEST_EMAIL'))
         r.click('saveMember')
         r.keyboard('[enter]')
-        r.wait(2)
+        r.wait(1)
         r.click('//*[@id="lnb"]/div/ul/li[6]/a')
         r.hover('addGroupName')
 
         if r.present('//*[@id="funTable"]/tbody/tr[4]') == True:
-            j_addr_result = '**OK** 주소록 저장이 완료되었습니다.'
-        else: j_addr_result = '**error** 주소록 저장 실패'
+            j_addr_result = '**OK**\n 주소록 저장이 완료되었습니다.'
+        else: j_addr_result = '**error**\n 주소록 저장 실패'
 
 
 class notify:
@@ -307,9 +326,9 @@ class notify:
 
     def asp():
 
-        r.telegram(os.getenv('TELEGRAM'), '1. 주소록 저장 테스트 결과 \n' + j_addr_result + '\n\n' + '2. SMS 발송 테스트 결과 \n' + '- '+ add_take + '\n - ' + sms_result + '\n\n' + '3. MMS 발송 테스트 결과\n' +'\n\n' + '4. 선거문자 발송 테스트 결과 \n' + election_result +'\n\n' + '5. 광고문자 발송 테스트 결과 \n' + ad_result + '\n\n' + '6. 팩스 발송 테스트 결과 \n')
+        r.telegram(os.getenv('TELEGRAM'), '1. 주소록 저장 테스트 결과 \n' + j_addr_result + '\n\n' + '2. SMS 발송 테스트 결과 \n' + add_take + '\n' + sms_result + '\n\n' + '3. 선거문자 발송 테스트 결과 \n' + election_result +'\n\n' + '4. 광고문자 발송 테스트 결과 \n' + ad_result + '\n\n' + '5. 팩스 발송 테스트 결과 \n' + fax_err + '\n' + fax_send)
         
-        print('1. 주소록 저장 테스트 결과 \n' + j_addr_result + '\n\n' + '2. SMS 발송 테스트 결과 \n' + '- '+ add_take + '\n - ' + sms_result + '\n\n' + '3. MMS 발송 테스트 결과\n' +'\n\n' + '4. 선거문자 발송 테스트 결과 \n' + election_result +'\n\n' + '5. 광고문자 발송 테스트 결과 \n' + ad_result + '\n\n' + '6. 팩스 발송 테스트 결과 \n')
+        print('1. 주소록 저장 테스트 결과 \n' + j_addr_result + '\n\n' + '2. SMS 발송 테스트 결과 \n' + add_take + '\n' + sms_result + '\n\n' + '3. MMS 발송 테스트 결과\n' +'\n\n' + '4. 선거문자 발송 테스트 결과 \n' + election_result +'\n\n' + '5. 광고문자 발송 테스트 결과 \n' + ad_result + '\n\n' + '6. 팩스 발송 테스트 결과 \n' + fax_err + '\n' + fax_send)
             
 
 

@@ -43,8 +43,8 @@ print('====광고문자 테스트 실행====')
 p.javaASP.ad_sms('이것은 광고문자입니다.')
 
 
-# print('====팩스 테스트 실행====')
-# p.javaASP.fax()
+print('====팩스 테스트 실행====')
+p.javaASP.fax('팩스 전송 테스트')
 
 p.wait()
 p.Bizmailer.restart()
